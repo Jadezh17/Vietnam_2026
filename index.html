@@ -1502,22 +1502,6 @@ function overviewHtml(){
     <table class="basetable"><tr><th>#</th><th>Stop</th><th>Dates</th><th>Nights</th></tr>
     ${BASES.map((b,i)=>`<tr data-base="${i}"><td><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${colors[i]}"></i> ${i+1}</td><td>${b.n}</td><td>${b.dates}</td><td><span class="nights">${b.nights}</span> <span class="muted">›</span></td></tr>`).join("")}
     </table>
-    <h3>Booked so far <span class="muted small" style="text-transform:none;letter-spacing:0;font-weight:400">· from your Booked tab</span></h3>
-    <ul class="tips">
-      <li>✈ <b>12 Dec</b> Sydney → Ho Chi Minh City · Vietnam Airlines · 11:50am → 4:15pm</li>
-      <li>🛏 <b>12–15 Dec</b> Vinpearl Landmark 81 · breakfast, lounge snacks & 5–8pm drinks</li>
-      <li>✈ <b>15 Dec</b> Ho Chi Minh City → Da Nang · Vietnam Airlines · 11:10am → 12:30pm</li>
-      <li>🛏 <b>15–18 Dec</b> Bel Marina Hoi An Resort · breakfast</li>
-      <li>🛳 <b>19–20 Dec</b> L'Amour Cruise, Ha Long Bay</li>
-    </ul>
-    <h3>Still to sort <button class="lnk" data-view-go="tasks" style="text-transform:none;letter-spacing:0;font-weight:500">open To do ›</button></h3>
-    <ul class="tips">${(()=>{const t=(typeof SL!=="undefined"?SL.items:[]).filter(x=>x.kind==="task"&&!x.done); return (t.length?t.map(x=>x.name):(typeof SL!=="undefined"&&SL.items.some(x=>x.kind==="task")?["All done 🎉"]:CHECKLIST)).map(c=>`<li>${esc(c)}</li>`).join("");})()}</ul>
-    <h3>Getting around</h3>
-    <ul class="tips">
-      <li><b>Grab</b> (car or bike) in every city — cheap, metered and no haggling.</li>
-      <li><b>Flights</b> Saigon → Da Nang (booked) and Da Nang → Hanoi (to book); Da Nang airport is ~45 min from Hoi An.</li>
-      <li><b>Cruise shuttle</b> Hanoi ⇄ Ha Long, ~2.5 hrs each way on the expressway.</li>
-    </ul>
     <h3>What to expect in mid-December</h3>
     <div class="weather"><div><b>23–32°C</b>Saigon · dry season</div><div><b>20–26°C</b>Hoi An · showers likely</div><div><b>14–21°C</b>Hanoi & Ha Long · misty</div></div>
     <p class="note" style="margin-top:12px">Pack for three climates: summer clothes for Saigon, a rain jacket for Hoi An and Ba Na Hills, and a warm layer for Hanoi and the bay.</p>`;
