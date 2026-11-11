@@ -1068,7 +1068,7 @@ details.more summary::-webkit-details-marker{display:none}
     </div>
     <div class="tabs" role="tablist" style="margin-left:auto">
       <button class="on" data-view="plan">Itinerary</button>
-      <button data-view="todo">Things to do <span class="slcount" id="cnt-todo"></span></button>
+      <button data-view="todo">Activities <span class="slcount" id="cnt-todo"></span></button>
       <button data-view="food">Restaurants <span class="slcount" id="cnt-food"></span></button>
       <button data-view="hotel">Hotels <span class="slcount" id="cnt-hotel"></span></button>
       <button data-view="tasks">To do <span class="slcount" id="cnt-tasks"></span></button>
@@ -1216,7 +1216,7 @@ const DAYS = [
         ["Night","Sunset-to-night views from Landmark 81 SkyView in the same building.","landmark81"]],
   food:[],stay:["h_vinpearl"],
   alert:"Australians need a Vietnam e-visa — apply at evisa.gov.vn at least a week before you fly.",
-  tips:["Annie shared a Saigon cheat sheet — 14 cafés and 18 local boutiques are under Things to do.","Vườn Thiên Giới garden café (your IG save) is ~20 min from Landmark 81 — fits a slow morning.","Install Grab before you leave — it's the easiest way around every city on this trip.","Landmark 81 is in Bình Thạnh, ~15–20 min by Grab from District 1."]},
+  tips:["Annie shared a Saigon cheat sheet — 14 cafés and 18 local boutiques are under Activities.","Vườn Thiên Giới garden café (your IG save) is ~20 min from Landmark 81 — fits a slow morning.","Install Grab before you leave — it's the easiest way around every city on this trip.","Landmark 81 is in Bình Thạnh, ~15–20 min by Grab from District 1."]},
  {n:2,date:"2026-12-13",title:"Saigon city day",base:"Ho Chi Minh City",
   travel:"Hotel → District 1 by Grab, ~15–20 min",
   plan:[["Morning","Independence Palace.","independence"],
@@ -1593,7 +1593,7 @@ let slCol=null; const slWrites={};
 const CURS=["₫","A$","US$"];
 const JPY_AUD=0.00006; // ≈ A$1 per 16,700₫ — rough guide only
 const CUR_MAP={VND:"₫",AUD:"A$",USD:"US$"};
-const KIND_LABEL={todo:"Things to do",food:"Restaurants",hotel:"Hotels"};
+const KIND_LABEL={todo:"Activities",food:"Restaurants",hotel:"Hotels"};
 
 function imgOf(x){ return x.img||(x.ref&&typeof PHOTOS!=="undefined"&&PHOTOS[x.ref]?PHOTOS[x.ref].src:""); }
 function slHas(id){return SL.items.some(x=>x.id===id);}
@@ -1968,14 +1968,14 @@ function renderTodo(){
   const own=SL.items.filter(x=>x.kind==="todo");
   const allS=Object.keys(P).filter(id=>P[id].t==="sight"||P[id].t==="bike");
   const hidden=allS.filter(isHidden); const sights=allS.filter(id=>!isHidden(id));
-  let html=`<div class="listhead"><div><div class="kicker">Explore</div><h2>Things to do</h2></div>
+  let html=`<div class="listhead"><div><div class="kicker">Explore</div><h2>Activities</h2></div>
     <div class="sumbox"><div><span>${sights.filter(id=>sightDay(id)>=0).length}</span>in the plan</div><div><span>${own.length}</span>your picks</div></div></div>
     <form class="adder full" id="adder" data-kind="todo">
       <div class="af"><label>Name</label><input name="name" placeholder="e.g. Cu Chi Tunnels" maxlength="90" autocomplete="off"></div>
       <div class="af"><label>Link</label><input name="link" placeholder="Google Maps, blog, tickets…" autocomplete="off"></div>
       <div class="af"><label>Location</label><select name="group">${GROUPS.map(g=>`<option value="${g.k}" ${SL.addGroup.todo===g.k?"selected":""}>${g.n}</option>`).join("")}</select></div>
       <div class="af"><label>Image <span class="muted">(optional)</span></label><label class="afimg"><input type="file" name="img" accept="image/*" hidden><span id="afimgtxt">Choose photo…</span></label></div>
-      <button class="btn" type="submit">Add thing to do</button>
+      <button class="btn" type="submit">Add activity</button>
     </form>
     <div class="hint muted">Everything in your itinerary, grouped by where you're staying. Tap a day to jump to it in the itinerary, or a photo to see it on the map. Add your own ideas above. ${SL.mode!=="local"?"Shared with everyone on this trip.":"Saved in this browser only."}</div>`;
   GROUPS.forEach(g=>{
