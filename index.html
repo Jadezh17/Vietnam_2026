@@ -1018,6 +1018,14 @@ table.bk input.cell.name{font-weight:600;font-size:14px;padding:2px 4px}
 .task.late .due{border-color:#111;font-weight:600}
 #taskadd{grid-template-columns:1fr auto}
 @media (max-width:1000px){#taskadd{grid-template-columns:1fr}}
+#join{position:fixed;inset:0;z-index:6000;background:rgba(17,17,17,.45);display:grid;place-items:center;padding:16px}
+#join form{background:#fff;color:#111;border-radius:10px;padding:22px;max-width:380px;width:100%;display:grid;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+#join h2{font-size:18px;margin:0}
+#join p{margin:0;font-size:13.5px;color:#555}
+#join input{font:inherit;font-size:14px;border:1px solid #111;border-radius:8px;padding:10px 12px}
+#join .err{color:#b00020;font-size:13px;min-height:1em}
+#join .row{display:flex;gap:8px;justify-content:flex-end}
+.whojoin{border:0;background:none;padding:0;font:inherit;font-size:12px;text-decoration:underline;cursor:pointer;color:#111}
 details.more{margin-top:24px}
 details.more summary{cursor:pointer;font-size:13px;font-weight:600;border-bottom:1px solid #111;padding-bottom:6px;list-style:none}
 details.more summary::-webkit-details-marker{display:none}
@@ -1611,7 +1619,7 @@ async function fillNames(){
 async function renderWho(){
   const el=$("#whobar"); if(!el) return;
   if(SL.mode==="sb"){ el.textContent="Shared trip · changes save for everyone with the trip link"; return; }
-  if(!USER||SL.mode!=="db"){ el.textContent=SL.mode!=="local"?"":"Viewing a copy · open your trip link to edit together"; return; }
+  if(!USER||SL.mode!=="db"){ if(SL.mode==="db"){ el.textContent=""; return; } el.innerHTML=`Viewing a copy · changes stay in this browser · <button class="whojoin" type="button">Enter trip code</button>`; el.querySelector(".whojoin").onclick=()=>window.showJoin&&window.showJoin(); return; }
   const ids=peopleIds(); const ps=await USER.profiles(ids);
   el.innerHTML=`<span class="avs"></span><span id="whotxt"></span>`;
   const avs=el.querySelector(".avs");
@@ -2064,15 +2072,33 @@ const SB={url:"https://rudgkogjdpwqwujgyqhw.supabase.co",key:"sb_publishable_dai
   if(window.claude) return;
   let code=null; const m=location.hash.match(/trip=([A-Za-z0-9]{12,64})/);
   if(m){ code=m[1]; try{ localStorage.setItem("vn_trip",code); }catch(e){} }
-  else { try{ code=localStorage.getItem("vn_trip"); }catch(e){} if(code&&!location.hash) history.replaceState(null,"","#trip="+code); }
-  if(!code){ renderWho(); return; }
-  SB.code=code;
+  else { try{ code=localStorage.getItem("vn_trip"); }catch(e){} }
+  window.showJoin=function(){
+    if(document.getElementById("join")) return;
+    const d=document.createElement("div"); d.id="join";
+    d.innerHTML=`<form><h2>Join the shared trip</h2><p>Enter the trip code (or paste the trip link) once on this device. After that, everything you change saves for everyone on the trip.</p><label for="joincode" class="muted small">Trip code</label><input id="joincode" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Trip code or link"><div class="err" id="joinerr"></div><div class="row"><button type="button" class="btn ghost" id="joinskip">Just look around</button><button class="btn" type="submit">Join</button></div></form>`;
+    document.body.appendChild(d); const inp=d.querySelector("#joincode"); inp.focus();
+    d.querySelector("#joinskip").onclick=()=>{ d.remove(); renderWho(); };
+    d.querySelector("form").onsubmit=async e=>{ e.preventDefault();
+      const raw=inp.value.trim(); const mm=raw.match(/trip=([A-Za-z0-9]{12,64})/)||raw.match(/^([A-Za-z0-9]{12,64})$/);
+      const err=d.querySelector("#joinerr"); if(!mm){ err.textContent="That doesn't look like a trip code."; return; }
+      err.textContent="Checking…";
+      try{ const items=await SB.rpc("get_trip_items",{p_code:mm[1]}); if(!Array.isArray(items)||!items.length){ err.textContent="That code doesn't match a trip. Check it and try again."; return; }
+        try{ localStorage.setItem("vn_trip",mm[1]); }catch(x){}
+        d.remove(); startShared(mm[1]); flash("Joined — your changes now save for everyone.");
+      }catch(x){ err.textContent="Couldn't reach the trip. Check your connection and try again."; }
+    };
+  };
+  if(!code){ renderWho(); setTimeout(()=>window.showJoin(),400); return; }
+  startShared(code);
+  function startShared(code){
+  SB.code=code; SL.mode="sb"; renderWho();
   const sig=a=>JSON.stringify(a.map(x=>({...x,img:(x.img||"").length})).sort((p,q)=>p.id<q.id?-1:1));
   async function pull(first){
     try{
       const items=await SB.rpc("get_trip_items",{p_code:code});
       if(!Array.isArray(items)) throw new Error("bad");
-      if(first&&!items.length){ flash("That trip link doesn't match a saved trip."); return; }
+      if(first&&!items.length){ SL.mode="local"; SB.code=null; try{ localStorage.removeItem("vn_trip"); }catch(x){} renderWho(); flash("That trip code doesn't match a saved trip."); window.showJoin(); return; }
       SL.mode="sb";
       const pending=SL.items.filter(x=>slWrites[x.id]&&!items.some(y=>y.id===x.id));
       const next=items.map(x=>{ const local=SL.items.find(y=>y.id===x.id); return local&&slWrites[x.id]?local:x; }).concat(pending);
@@ -2086,6 +2112,7 @@ const SB={url:"https://rudgkogjdpwqwujgyqhw.supabase.co",key:"sb_publishable_dai
   setInterval(()=>{ if(!document.hidden) pull(false); },30000);
   document.addEventListener("visibilitychange",()=>{ if(!document.hidden) pull(false); });
   window.addEventListener("focus",()=>pull(false));
+  }
 })();
 renderWho();
 (async()=>{
